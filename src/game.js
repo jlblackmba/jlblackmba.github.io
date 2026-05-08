@@ -23,6 +23,10 @@ export class Game {
     this.cameraX = 0;
     this.lastTime = 0;
     this.messageTimer = 0;
+    this.resizeCanvas();
+
+    this.resizeObserver = new ResizeObserver(() => this.resizeCanvas());
+    this.resizeObserver.observe(this.canvas);
   }
 
   loadLevel(level) {
@@ -37,6 +41,22 @@ export class Game {
 
   startLoop() {
     requestAnimationFrame((time) => this.loop(time));
+  }
+
+  resizeCanvas() {
+    const rect = this.canvas.getBoundingClientRect();
+    const width = Math.max(320, Math.round(rect.width));
+    const height = Math.max(320, Math.round(rect.height));
+
+    if (this.canvas.width === width && this.canvas.height === height) return;
+
+    this.canvas.width = width;
+    this.canvas.height = height;
+    this.cameraX = clamp(
+      this.player ? this.player.x + this.player.w / 2 - this.canvas.width * 0.38 : 0,
+      0,
+      this.level ? Math.max(0, this.level.width - this.canvas.width) : 0,
+    );
   }
 
   start() {

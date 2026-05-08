@@ -37,21 +37,22 @@ button {
 
 .game-shell {
   width: min(100%, 72rem);
-  min-height: 100vh;
+  min-height: 100svh;
   margin: 0 auto;
-  padding: max(1rem, env(safe-area-inset-top)) 1rem max(1rem, env(safe-area-inset-bottom));
+  padding: max(0.55rem, env(safe-area-inset-top)) 0.55rem max(0.55rem, env(safe-area-inset-bottom));
   display: grid;
-  align-content: center;
-  gap: 1rem;
+  grid-template-rows: auto minmax(0, 1fr);
+  align-content: stretch;
+  gap: 0.55rem;
 }
 
 .hero-panel {
-  padding: 0.25rem 0.25rem 0;
+  padding: 0.1rem 0.25rem 0;
 }
 
 .eyebrow {
-  margin: 0 0 0.25rem;
-  font-size: 0.78rem;
+  margin: 0 0 0.16rem;
+  font-size: clamp(0.64rem, 2.5vw, 0.78rem);
   font-weight: 800;
   letter-spacing: 0.16em;
   text-transform: uppercase;
@@ -60,7 +61,7 @@ button {
 
 h1 {
   margin: 0;
-  font-size: clamp(2.6rem, 16vw, 6.5rem);
+  font-size: clamp(2.15rem, 13vw, 6.5rem);
   line-height: 0.86;
   letter-spacing: -0.08em;
   text-shadow: 0.08em 0.08em 0 rgba(248, 198, 84, 0.45);
@@ -68,21 +69,24 @@ h1 {
 
 .tagline {
   max-width: 36rem;
-  margin: 0.8rem 0 0;
-  font-size: clamp(1rem, 3.8vw, 1.35rem);
+  margin: 0.42rem 0 0;
+  font-size: clamp(0.88rem, 3.4vw, 1.35rem);
 }
 
 .stage-card {
   overflow: hidden;
-  border: 0.22rem solid var(--ink);
-  border-radius: 1.4rem;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  min-height: 0;
+  border: 0.18rem solid var(--ink);
+  border-radius: 1rem;
   background: rgba(255, 247, 232, 0.82);
   box-shadow: 0 1.2rem 2.5rem var(--shadow);
 }
 
 .hud {
-  min-height: 2.7rem;
-  padding: 0.65rem 0.8rem;
+  min-height: 2.25rem;
+  padding: 0.48rem 0.62rem;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -105,6 +109,7 @@ h1 {
 
 .canvas-wrap {
   position: relative;
+  min-height: 0;
   background: #6ec3ff;
   touch-action: none;
 }
@@ -112,7 +117,8 @@ h1 {
 canvas {
   display: block;
   width: 100%;
-  aspect-ratio: 16 / 9;
+  height: min(68svh, calc(100svh - 12rem));
+  min-height: 20rem;
   image-rendering: pixelated;
 }
 
@@ -152,7 +158,7 @@ canvas {
 }
 
 .touch-controls {
-  padding: 0.75rem;
+  padding: 0.55rem 0.65rem 0.65rem;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -168,8 +174,8 @@ canvas {
 }
 
 .touch-button {
-  min-width: 4.4rem;
-  min-height: 3.6rem;
+  min-width: clamp(3.75rem, 18vw, 4.4rem);
+  min-height: 3.25rem;
   border: 0.18rem solid var(--ink);
   border-radius: 1rem;
   background: #ffffff;
@@ -203,9 +209,29 @@ canvas {
 
 @media (min-width: 720px) {
   .game-shell {
+    min-height: 100vh;
+    padding: max(1rem, env(safe-area-inset-top)) 1rem max(1rem, env(safe-area-inset-bottom));
     grid-template-columns: 0.72fr 1.28fr;
+    grid-template-rows: auto;
     align-items: center;
+    align-content: center;
     gap: 1.4rem;
+  }
+
+  .stage-card {
+    border-width: 0.22rem;
+    border-radius: 1.4rem;
+  }
+
+  .hud {
+    min-height: 2.7rem;
+    padding: 0.65rem 0.8rem;
+  }
+
+  canvas {
+    height: auto;
+    min-height: 0;
+    aspect-ratio: 16 / 9;
   }
 
   .touch-controls {
