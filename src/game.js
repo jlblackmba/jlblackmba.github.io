@@ -103,7 +103,7 @@ export class Game {
     this.cameraX = clamp(
       this.player.x + this.player.w / 2 - this.canvas.width * 0.38,
       0,
-      this.level.width - this.canvas.width,
+      Math.max(0, this.level.width - this.canvas.width),
     );
 
     if (this.messageTimer > 0) {
