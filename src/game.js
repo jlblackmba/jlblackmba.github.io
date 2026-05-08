@@ -1,0 +1,237 @@
+import { Collectible } from "./entities/Collectible.js";
+import { Enemy } from "./entities/Enemy.js";
+import { Player } from "./entities/Player.js";
+import { intersects, resolvePlatforms } from "./physics.js";
+
+const messages = {
+  intro: "Find the deploy gate",
+  coffee: "+1 focus",
+  hit: "Regression detected. Rollback!",
+  hazard: "Merge conflict hurts.",
+  win: "Deployed on Friday. Bold.",
+};
+
+export class Game {
+  constructor(canvas, input, hud, overlay, startButton) {
+    this.canvas = canvas;
+    this.ctx = canvas.getContext("2d");
+    this.input = input;
+    this.hud = hud;
+    this.overlay = overlay;
+    this.startButton = startButton;
+    this.state = "menu";
+    this.cameraX = 0;
+    this.lastTime = 0;
+    this.messageTimer = 0;
+  }
+
+  loadLevel(level) {
+    this.level = level;
+    this.player = new Player(level.playerStart);
+    this.enemies = level.enemies.map((enemy) => new Enemy(enemy));
+    this.collectibles = level.collectibles.map((item) => new Collectible(item));
+    this.collected = 0;
+    this.setMessage(messages.intro, 0);
+    this.syncHud();
+  }
+
+  startLoop() {
+    requestAnimationFrame((time) => this.loop(time));
+  }
+
+  start() {
+    if (this.state === "won" || this.state === "lost") {
+      this.loadLevel(this.level);
+    }
+
+    this.state = "playing";
+    this.overlay.classList.remove("is-visible");
+    this.input.clearTransient();
+  }
+
+  restart() {
+    this.loadLevel(this.level);
+    this.start();
+  }
+
+  loop(time) {
+    const dt = Math.min((time - this.lastTime) / 1000 || 0, 1 / 30);
+    this.lastTime = time;
+
+    this.update(dt);
+    this.draw(time / 1000);
+
+    requestAnimationFrame((nextTime) => this.loop(nextTime));
+  }
+
+  update(dt) {
+    if (this.input.consume("restart")) {
+      this.restart();
+    }
+
+    if (this.state !== "playing") return;
+
+    this.player.update(this.input, dt);
+    resolvePlatforms(this.player, this.level.platforms);
+    this.keepPlayerInLevel();
+
+    this.enemies.forEach((enemy) => enemy.update(dt));
+    this.checkCollectibles();
+    this.checkDanger();
+    this.checkGoal();
+
+    this.cameraX = clamp(
+      this.player.x + this.player.w / 2 - this.canvas.width * 0.38,
+      0,
+      this.level.width - this.canvas.width,
+    );
+
+    if (this.messageTimer > 0) {
+      this.messageTimer -= dt;
+      if (this.messageTimer <= 0) this.setMessage(messages.intro, 0);
+    }
+
+    this.syncHud();
+  }
+
+  keepPlayerInLevel() {
+    this.player.x = clamp(this.player.x, 0, this.level.width - this.player.w);
+    if (this.player.y > this.level.height + 120) {
+      this.fail(messages.hit);
+    }
+  }
+
+  checkCollectibles() {
+    for (const item of this.collectibles) {
+      if (item.collected || !intersects(this.player, item)) continue;
+      item.collected = true;
+      this.collected += 1;
+      this.setMessage(messages.coffee, 1.2);
+    }
+  }
+
+  checkDanger() {
+    for (const enemy of this.enemies) {
+      if (intersects(this.player, enemy)) {
+        this.fail(enemy.type === "ticket" ? "JIRA says this is urgent." : messages.hit);
+        return;
+      }
+    }
+
+    for (const hazard of this.level.hazards) {
+      if (intersects(this.player, hazard)) {
+        this.fail(messages.hazard);
+        return;
+      }
+    }
+  }
+
+  checkGoal() {
+    if (!intersects(this.player, this.level.goal)) return;
+    this.state = "won";
+    this.setMessage(messages.win, 0);
+    this.showOverlay("Sprint Complete", "You reached the deploy gate with " + this.collected + " coffee.");
+  }
+
+  fail(reason) {
+    this.setMessage(reason, 0);
+    this.showOverlay("Rollback Required", reason + " Try the sprint again?");
+    this.state = "lost";
+  }
+
+  showOverlay(title, body) {
+    this.overlay.querySelector("h2").textContent = title;
+    this.overlay.querySelector("p").textContent = body;
+    this.startButton.textContent = "Restart Quest";
+    this.overlay.classList.add("is-visible");
+  }
+
+  setMessage(message, duration) {
+    this.message = message;
+    this.messageTimer = duration;
+  }
+
+  syncHud() {
+    this.hud.levelName.textContent = this.level.name;
+    this.hud.coffee.textContent = `Coffee: ${this.collected}/${this.collectibles.length}`;
+    this.hud.status.textContent = this.message;
+  }
+
+  draw(time) {
+    const ctx = this.ctx;
+    ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+    this.drawBackground(ctx);
+
+    ctx.save();
+    ctx.translate(-this.cameraX, 0);
+
+    this.drawGoal(ctx, this.level.goal, time);
+    this.level.platforms.forEach((platform) => this.drawPlatform(ctx, platform));
+    this.level.hazards.forEach((hazard) => this.drawHazard(ctx, hazard, time));
+    this.collectibles.forEach((item) => item.draw(ctx, time));
+    this.enemies.forEach((enemy) => enemy.draw(ctx));
+    this.player.draw(ctx);
+
+    ctx.restore();
+  }
+
+  drawBackground(ctx) {
+    const gradient = ctx.createLinearGradient(0, 0, 0, this.canvas.height);
+    gradient.addColorStop(0, "#86dbff");
+    gradient.addColorStop(0.72, "#d9f7ff");
+    gradient.addColorStop(1, "#fff1c6");
+    ctx.fillStyle = gradient;
+    ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+
+    ctx.fillStyle = "rgba(255,255,255,0.78)";
+    this.drawCloud(ctx, 94 - this.cameraX * 0.16, 92);
+    this.drawCloud(ctx, 460 - this.cameraX * 0.11, 64);
+    this.drawCloud(ctx, 820 - this.cameraX * 0.18, 118);
+
+    ctx.fillStyle = "rgba(35, 54, 79, 0.08)";
+    for (let x = -80; x < this.canvas.width + 120; x += 180) {
+      ctx.fillRect(x - (this.cameraX * 0.32) % 180, 438, 110, 48);
+    }
+  }
+
+  drawCloud(ctx, x, y) {
+    ctx.fillRect(x, y + 18, 86, 22);
+    ctx.fillRect(x + 18, y + 4, 34, 34);
+    ctx.fillRect(x + 48, y + 10, 28, 28);
+  }
+
+  drawPlatform(ctx, platform) {
+    ctx.fillStyle = platform.theme === "ground" ? "#59b86c" : "#8ccf69";
+    ctx.fillRect(platform.x, platform.y, platform.w, platform.h);
+    ctx.fillStyle = "#23364f";
+    ctx.fillRect(platform.x, platform.y, platform.w, 6);
+    ctx.fillStyle = "rgba(255,255,255,0.24)";
+    ctx.fillRect(platform.x + 8, platform.y + 9, Math.max(0, platform.w - 16), 4);
+  }
+
+  drawHazard(ctx, hazard, time) {
+    const pulse = Math.sin(time * 10) > 0;
+    ctx.fillStyle = pulse ? "#e4574f" : "#f8c654";
+    ctx.fillRect(hazard.x, hazard.y, hazard.w, hazard.h);
+    ctx.fillStyle = "#23364f";
+    ctx.fillRect(hazard.x + 5, hazard.y + 5, hazard.w - 10, 5);
+    ctx.fillRect(hazard.x + 12, hazard.y + 15, hazard.w - 24, 4);
+  }
+
+  drawGoal(ctx, goal, time) {
+    ctx.fillStyle = "#23364f";
+    ctx.fillRect(goal.x - 8, goal.y - 12, goal.w + 16, goal.h + 12);
+    ctx.fillStyle = "#ffffff";
+    ctx.fillRect(goal.x, goal.y - 4, goal.w, goal.h);
+    ctx.fillStyle = "#2f6fed";
+    ctx.fillRect(goal.x + 8, goal.y + 8, goal.w - 16, goal.h - 24);
+    ctx.fillStyle = Math.sin(time * 5) > 0 ? "#76d16e" : "#f8c654";
+    ctx.fillRect(goal.x + 18, goal.y + 22, goal.w - 36, 12);
+    ctx.fillStyle = "#23364f";
+    ctx.fillRect(goal.x + 10, goal.y + goal.h - 10, goal.w - 20, 6);
+  }
+}
+
+function clamp(value, min, max) {
+  return Math.max(min, Math.min(max, value));
+}
