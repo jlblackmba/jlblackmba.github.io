@@ -9,6 +9,7 @@ const APP_SHELL = [
   "./assets/icons/dev-quest-icon.svg",
   "./src/main.js",
   "./src/audio.js",
+  "./src/deathMessageData.js",
   "./src/game.js",
   "./src/input.js",
   "./src/levels.js",
