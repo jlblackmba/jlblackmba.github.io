@@ -199,6 +199,7 @@ canvas {
 .overlay p {
   max-width: 28rem;
   margin: 0.7rem auto 1rem;
+  line-height: 1.45;
 }
 
 .overlay button {
