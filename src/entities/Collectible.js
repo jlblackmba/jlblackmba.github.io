@@ -16,6 +16,18 @@ export class Collectible {
     const x = this.x;
     const y = this.y + bob;
 
+    if (this.type === "zyn") {
+      ctx.fillStyle = "#ffffff";
+      ctx.fillRect(x + 4, y + 4, 18, 18);
+      ctx.fillStyle = "#2f6fed";
+      ctx.fillRect(x + 6, y + 6, 14, 14);
+      ctx.fillStyle = "#ffffff";
+      ctx.fillRect(x + 9, y + 9, 8, 8);
+      ctx.fillStyle = "#23364f";
+      ctx.fillRect(x + 11, y + 11, 4, 4);
+      return;
+    }
+
     ctx.fillStyle = "#ffffff";
     ctx.fillRect(x + 5, y + 10, 17, 14);
     ctx.fillStyle = "#8a4b2f";

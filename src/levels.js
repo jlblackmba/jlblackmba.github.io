@@ -22,9 +22,12 @@ export const sprintPlanning = {
   ],
   collectibles: [
     { type: "coffee", x: 222, y: 358 },
+    { type: "zyn", x: 344, y: 448 },
     { type: "coffee", x: 492, y: 290 },
+    { type: "zyn", x: 840, y: 350 },
     { type: "coffee", x: 1046, y: 276 },
     { type: "coffee", x: 1360, y: 358 },
+    { type: "zyn", x: 1460, y: 448 },
   ],
   goal: { x: 1560, y: 414, w: 58, h: 72 },
 };
@@ -59,10 +62,13 @@ export const qaGauntlet = {
   ],
   collectibles: [
     { type: "coffee", x: 226, y: 356 },
+    { type: "zyn", x: 332, y: 448 },
     { type: "coffee", x: 490, y: 286 },
     { type: "coffee", x: 760, y: 334 },
+    { type: "zyn", x: 920, y: 448 },
     { type: "coffee", x: 1076, y: 270 },
     { type: "coffee", x: 1628, y: 286 },
+    { type: "zyn", x: 1714, y: 448 },
   ],
   goal: { x: 1834, y: 414, w: 58, h: 72 },
 };

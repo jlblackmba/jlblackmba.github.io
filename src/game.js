@@ -6,6 +6,7 @@ import { intersects, resolvePlatforms } from "./physics.js";
 const messages = {
   intro: "Find the deploy gate",
   coffee: "+1 focus",
+  zyn: "+1 nicotine clarity",
   win: "Deployed on Friday. Bold.",
 };
 
@@ -67,6 +68,8 @@ export class Game {
     this.enemies = this.level.enemies.map((enemy) => new Enemy(enemy));
     this.collectibles = this.level.collectibles.map((item) => new Collectible(item));
     this.collected = 0;
+    this.collectedCoffee = 0;
+    this.collectedZyn = 0;
     this.setMessage(messages.intro, 0);
     this.syncHud();
     this.resizeCanvas();
@@ -166,7 +169,13 @@ export class Game {
       if (item.collected || !intersects(this.player, item)) continue;
       item.collected = true;
       this.collected += 1;
-      this.setMessage(messages.coffee, 1.2);
+      if (item.type === "zyn") {
+        this.collectedZyn += 1;
+        this.setMessage(messages.zyn, 1.2);
+      } else {
+        this.collectedCoffee += 1;
+        this.setMessage(messages.coffee, 1.2);
+      }
       this.sounds?.coffee();
     }
   }
@@ -194,7 +203,11 @@ export class Game {
     this.sounds?.win();
     this.showOverlay(
       "Sprint Complete",
-      "You reached the deploy gate with " + this.collected + " coffee.",
+      "You reached the deploy gate with " +
+        this.collectedCoffee +
+        " coffee and " +
+        this.collectedZyn +
+        " Zyn.",
       this.hasNextLevel() ? "Next Sprint" : "Restart Quest",
     );
   }
@@ -231,7 +244,9 @@ export class Game {
 
   syncHud() {
     this.hud.levelName.textContent = this.level.name;
-    this.hud.coffee.textContent = `Coffee: ${this.collected}/${this.collectibles.length}`;
+    const totalCoffee = this.collectibles.filter((item) => item.type === "coffee").length;
+    const totalZyn = this.collectibles.filter((item) => item.type === "zyn").length;
+    this.hud.coffee.textContent = `Coffee ${this.collectedCoffee}/${totalCoffee} | Zyn ${this.collectedZyn}/${totalZyn}`;
     this.hud.status.textContent = this.message;
   }
 
