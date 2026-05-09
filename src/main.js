@@ -1,6 +1,6 @@
 import { Game } from "./game.js";
 import { Input } from "./input.js";
-import { sprintPlanning } from "./levels.js";
+import { levels } from "./levels.js";
 
 const canvas = document.querySelector("#game");
 const overlay = document.querySelector("#overlay");
@@ -14,9 +14,9 @@ const hud = {
 };
 
 const input = new Input(document);
-const game = new Game(canvas, input, hud, overlay, startButton);
+const game = new Game(canvas, input, hud, overlay, startButton, levels);
 
-game.loadLevel(sprintPlanning);
+game.loadLevel(0);
 game.startLoop();
 
 startButton.addEventListener("click", () => {

@@ -1,4 +1,4 @@
-const CACHE_NAME = "dev-quest-v4";
+const CACHE_NAME = "dev-quest-v5";
 const APP_SHELL = [
   "./",
   "./index.html",

@@ -12,13 +12,15 @@ const messages = {
 };
 
 export class Game {
-  constructor(canvas, input, hud, overlay, startButton) {
+  constructor(canvas, input, hud, overlay, startButton, levels = []) {
     this.canvas = canvas;
     this.ctx = canvas.getContext("2d");
     this.input = input;
     this.hud = hud;
     this.overlay = overlay;
     this.startButton = startButton;
+    this.levels = levels;
+    this.levelIndex = 0;
     this.state = "menu";
     this.cameraX = 0;
     this.lastTime = 0;
@@ -30,10 +32,17 @@ export class Game {
   }
 
   loadLevel(level) {
-    this.level = level;
-    this.player = new Player(level.playerStart);
-    this.enemies = level.enemies.map((enemy) => new Enemy(enemy));
-    this.collectibles = level.collectibles.map((item) => new Collectible(item));
+    if (Number.isInteger(level)) {
+      this.levelIndex = clamp(level, 0, this.levels.length - 1);
+      this.level = this.levels[this.levelIndex];
+    } else {
+      this.level = level;
+      this.levelIndex = Math.max(0, this.levels.indexOf(level));
+    }
+
+    this.player = new Player(this.level.playerStart);
+    this.enemies = this.level.enemies.map((enemy) => new Enemy(enemy));
+    this.collectibles = this.level.collectibles.map((item) => new Collectible(item));
     this.collected = 0;
     this.setMessage(messages.intro, 0);
     this.syncHud();
@@ -64,8 +73,10 @@ export class Game {
   }
 
   start() {
-    if (this.state === "won" || this.state === "lost") {
-      this.loadLevel(this.level);
+    if (this.state === "won" && this.hasNextLevel()) {
+      this.loadLevel(this.levelIndex + 1);
+    } else if (this.state === "won" || this.state === "lost") {
+      this.loadLevel(this.levelIndex);
     }
 
     this.state = "playing";
@@ -154,20 +165,28 @@ export class Game {
     if (!intersects(this.player, this.level.goal)) return;
     this.state = "won";
     this.setMessage(messages.win, 0);
-    this.showOverlay("Sprint Complete", "You reached the deploy gate with " + this.collected + " coffee.");
+    this.showOverlay(
+      "Sprint Complete",
+      "You reached the deploy gate with " + this.collected + " coffee.",
+      this.hasNextLevel() ? "Next Sprint" : "Restart Quest",
+    );
   }
 
   fail(reason) {
     this.setMessage(reason, 0);
-    this.showOverlay("Rollback Required", reason + " Try the sprint again?");
+    this.showOverlay("Rollback Required", reason + " Try the sprint again?", "Restart Sprint");
     this.state = "lost";
   }
 
-  showOverlay(title, body) {
+  showOverlay(title, body, buttonLabel) {
     this.overlay.querySelector("h2").textContent = title;
     this.overlay.querySelector("p").textContent = body;
-    this.startButton.textContent = "Restart Quest";
+    this.startButton.textContent = buttonLabel;
     this.overlay.classList.add("is-visible");
+  }
+
+  hasNextLevel() {
+    return this.levelIndex < this.levels.length - 1;
   }
 
   setMessage(message, duration) {
