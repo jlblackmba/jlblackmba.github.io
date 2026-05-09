@@ -6,9 +6,30 @@ import { intersects, resolvePlatforms } from "./physics.js";
 const messages = {
   intro: "Find the deploy gate",
   coffee: "+1 focus",
-  hit: "Regression detected. Rollback!",
-  hazard: "Merge conflict hurts.",
   win: "Deployed on Friday. Bold.",
+};
+
+const deathMessages = {
+  fall: [
+    "You fell out of scope. Product says that was intentional.",
+    "Gravity filed a blocker and assigned it to you.",
+    "You missed the platform. Let's call it a learning sprint.",
+  ],
+  bug: [
+    "Regression detected. Somehow this passed QA.",
+    "A bug escaped triage and chose violence.",
+    "Looks like this one needs a hotfix and a very quiet postmortem.",
+  ],
+  ticket: [
+    "Jira says this is urgent, so naturally it appeared from nowhere.",
+    "A surprise P0 sprint-jacked your roadmap.",
+    "Stakeholder feedback arrived with no acceptance criteria.",
+  ],
+  hazard: [
+    "Merge conflict hurts. Especially when it has opinions.",
+    "The blocker was marked resolved, but only in the meeting notes.",
+    "Scope creep got promoted to must-have.",
+  ],
 };
 
 export class Game {
@@ -22,6 +43,7 @@ export class Game {
     this.levels = levels;
     this.sounds = sounds;
     this.levelIndex = 0;
+    this.deathMessageIndex = 0;
     this.state = "menu";
     this.cameraX = 0;
     this.lastTime = 0;
@@ -135,7 +157,7 @@ export class Game {
   keepPlayerInLevel() {
     this.player.x = clamp(this.player.x, 0, this.level.width - this.player.w);
     if (this.player.y > this.level.height + 120) {
-      this.fail(messages.hit);
+      this.fail(this.getDeathMessage("fall"));
     }
   }
 
@@ -152,14 +174,14 @@ export class Game {
   checkDanger() {
     for (const enemy of this.enemies) {
       if (intersects(this.player, enemy)) {
-        this.fail(enemy.type === "ticket" ? "JIRA says this is urgent." : messages.hit);
+        this.fail(this.getDeathMessage(enemy.type === "ticket" ? "ticket" : "bug"));
         return;
       }
     }
 
     for (const hazard of this.level.hazards) {
       if (intersects(this.player, hazard)) {
-        this.fail(messages.hazard);
+        this.fail(this.getDeathMessage("hazard"));
         return;
       }
     }
@@ -193,6 +215,13 @@ export class Game {
 
   hasNextLevel() {
     return this.levelIndex < this.levels.length - 1;
+  }
+
+  getDeathMessage(type) {
+    const messagesForType = deathMessages[type] || deathMessages.bug;
+    const message = messagesForType[this.deathMessageIndex % messagesForType.length];
+    this.deathMessageIndex += 1;
+    return message;
   }
 
   setMessage(message, duration) {
