@@ -4,16 +4,33 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <meta name="theme-color" content="#112a46" />
+    <meta name="application-name" content="Dev Quest" />
+    <meta name="apple-mobile-web-app-title" content="Dev Quest" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="description" content="A mobile-first platformer about collecting coffee, dodging bugs, and shipping the sprint." />
     <title>Dev Quest</title>
+    <link rel="manifest" href="./manifest.webmanifest" />
+    <link rel="icon" href="./assets/icons/dev-quest-icon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="./assets/icons/dev-quest-icon-192.png" />
     <link rel="stylesheet" href="./styles.css" />
   </head>
   <body>
     <main class="game-shell" aria-label="Dev Quest game">
-      <section class="hero-panel">
-        <p class="eyebrow">Mobile-first platformer</p>
-        <h1>Dev Quest</h1>
-        <p class="tagline">Collect coffee, dodge bugs, and ship before the sprint derails.</p>
-      </section>
+      <header class="app-bar">
+        <div class="brand-lockup">
+          <img class="app-icon" src="./assets/icons/dev-quest-icon.svg" width="44" height="44" alt="" />
+          <div>
+            <p class="eyebrow">Mobile-first platformer</p>
+            <h1>Dev Quest</h1>
+          </div>
+        </div>
+        <div class="app-actions">
+          <span id="pwa-status" class="pwa-status" aria-live="polite">Online</span>
+          <button id="install-button" class="install-button" type="button" hidden>Install</button>
+        </div>
+      </header>
 
       <section class="stage-card">
         <div class="hud" aria-live="polite">
