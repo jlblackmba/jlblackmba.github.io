@@ -1,4 +1,4 @@
-const CACHE_NAME = "dev-quest-v5";
+const CACHE_NAME = "dev-quest-v6";
 const APP_SHELL = [
   "./",
   "./index.html",
@@ -8,6 +8,7 @@ const APP_SHELL = [
   "./assets/icons/dev-quest-icon-512.png",
   "./assets/icons/dev-quest-icon.svg",
   "./src/main.js",
+  "./src/audio.js",
   "./src/game.js",
   "./src/input.js",
   "./src/levels.js",

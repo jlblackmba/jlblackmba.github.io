@@ -12,7 +12,7 @@ const messages = {
 };
 
 export class Game {
-  constructor(canvas, input, hud, overlay, startButton, levels = []) {
+  constructor(canvas, input, hud, overlay, startButton, levels = [], sounds = null) {
     this.canvas = canvas;
     this.ctx = canvas.getContext("2d");
     this.input = input;
@@ -20,6 +20,7 @@ export class Game {
     this.overlay = overlay;
     this.startButton = startButton;
     this.levels = levels;
+    this.sounds = sounds;
     this.levelIndex = 0;
     this.state = "menu";
     this.cameraX = 0;
@@ -82,6 +83,7 @@ export class Game {
     this.state = "playing";
     this.overlay.classList.remove("is-visible");
     this.input.clearTransient();
+    this.sounds?.start();
   }
 
   restart() {
@@ -106,7 +108,8 @@ export class Game {
 
     if (this.state !== "playing") return;
 
-    this.player.update(this.input, dt);
+    const playerEvents = this.player.update(this.input, dt);
+    if (playerEvents.jumped) this.sounds?.jump();
     resolvePlatforms(this.player, this.level.platforms);
     this.keepPlayerInLevel();
 
@@ -142,6 +145,7 @@ export class Game {
       item.collected = true;
       this.collected += 1;
       this.setMessage(messages.coffee, 1.2);
+      this.sounds?.coffee();
     }
   }
 
@@ -165,6 +169,7 @@ export class Game {
     if (!intersects(this.player, this.level.goal)) return;
     this.state = "won";
     this.setMessage(messages.win, 0);
+    this.sounds?.win();
     this.showOverlay(
       "Sprint Complete",
       "You reached the deploy gate with " + this.collected + " coffee.",
@@ -174,6 +179,7 @@ export class Game {
 
   fail(reason) {
     this.setMessage(reason, 0);
+    this.sounds?.fail();
     this.showOverlay("Rollback Required", reason + " Try the sprint again?", "Restart Sprint");
     this.state = "lost";
   }

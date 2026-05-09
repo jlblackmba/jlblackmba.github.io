@@ -20,6 +20,7 @@ export class Player {
   update(input, dt) {
     this.prevX = this.x;
     this.prevY = this.y;
+    const events = { jumped: false };
 
     const axis = Number(input.isDown("right")) - Number(input.isDown("left"));
     const acceleration = this.grounded ? 2100 : 1300;
@@ -38,6 +39,7 @@ export class Player {
     if (input.consume("jump") && this.grounded) {
       this.vy = -610;
       this.grounded = false;
+      events.jumped = true;
     }
 
     this.vy += 1650 * dt;
@@ -45,6 +47,7 @@ export class Player {
 
     this.x += this.vx * dt;
     this.y += this.vy * dt;
+    return events;
   }
 
   draw(ctx) {

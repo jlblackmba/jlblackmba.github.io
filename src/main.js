@@ -1,3 +1,4 @@
+import { SoundBoard } from "./audio.js";
 import { Game } from "./game.js";
 import { Input } from "./input.js";
 import { levels } from "./levels.js";
@@ -14,12 +15,14 @@ const hud = {
 };
 
 const input = new Input(document);
-const game = new Game(canvas, input, hud, overlay, startButton, levels);
+const sounds = new SoundBoard();
+const game = new Game(canvas, input, hud, overlay, startButton, levels, sounds);
 
 game.loadLevel(0);
 game.startLoop();
 
-startButton.addEventListener("click", () => {
+startButton.addEventListener("click", async () => {
+  await sounds.resume();
   game.start();
 });
 
