@@ -5,7 +5,7 @@ import { intersects, resolvePlatforms } from "./physics.js";
 import { deathMessages } from "./deathMessageData.js";
 
 const messages = {
-  intro: "Find the deploy gate",
+  intro: "Survive the sprint",
   coffee: "+1 focus",
   zyn: "+1 nicotine clarity",
   win: "Deployed on Friday. Bold.",
