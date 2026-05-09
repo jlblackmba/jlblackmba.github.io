@@ -37,6 +37,7 @@ export class Game {
     this.collected = 0;
     this.setMessage(messages.intro, 0);
     this.syncHud();
+    this.resizeCanvas();
   }
 
   startLoop() {
@@ -45,8 +46,11 @@ export class Game {
 
   resizeCanvas() {
     const rect = this.canvas.getBoundingClientRect();
-    const width = Math.max(320, Math.round(rect.width));
-    const height = Math.max(320, Math.round(rect.height));
+    const cssWidth = Math.max(1, Math.round(rect.width));
+    const cssHeight = Math.max(1, Math.round(rect.height));
+    const levelHeight = this.level ? this.level.height : 540;
+    const height = Math.max(levelHeight, cssHeight);
+    const width = Math.max(320, Math.round(cssWidth * (height / cssHeight)));
 
     if (this.canvas.width === width && this.canvas.height === height) return;
 
