@@ -180,7 +180,7 @@ export class Game {
     this.setMessage(messages.win, 0);
     this.sounds?.win();
     this.showOverlay(
-      "Sprint Complete",
+      "You survived the sprint!",
       "You reached the deploy gate with " +
         this.collectedCoffee +
         " coffee and " +
@@ -193,7 +193,7 @@ export class Game {
   fail(reason) {
     this.setMessage(reason, 0);
     this.sounds?.fail();
-    this.showOverlay("Rollback Required", reason + " Try the sprint again?", "Restart Sprint");
+    this.showOverlay("Uh oh!", reason, "Restart Sprint");
     this.state = "lost";
   }
 
