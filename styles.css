@@ -338,7 +338,9 @@ canvas {
   }
 
   .canvas-wrap {
-    height: 100%;
+    display: grid;
+    min-height: 0;
+    overflow: hidden;
   }
 
   canvas {
